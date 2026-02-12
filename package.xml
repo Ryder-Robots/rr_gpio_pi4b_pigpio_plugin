@@ -12,6 +12,7 @@
   <depend>ros-kilted-rr-common-base</depend>
   <depend>ros-kilted-rr-interfaces</depend>
   <depend>ros-kilted-rr-motor-controller</depend>
+  <depend>rrpigpio</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

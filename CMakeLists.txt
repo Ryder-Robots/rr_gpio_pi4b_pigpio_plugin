@@ -11,6 +11,7 @@ find_package(ament_cmake_ros REQUIRED)
 find_package(ros-kilted-rr-common-base REQUIRED)
 find_package(ros-kilted-rr-interfaces REQUIRED)
 find_package(ros-kilted-rr-motor-controller REQUIRED)
+find_package(pigpio REQUIRED)
 
 add_library(rr_gpio_pi4b_pigpio_plugin src/rr_gpio_pi4b_pigpio_plugin.cpp)
 add_library(rr_gpio_pi4b_pigpio_plugin::rr_gpio_pi4b_pigpio_plugin ALIAS rr_gpio_pi4b_pigpio_plugin)
@@ -20,6 +21,7 @@ target_include_directories(rr_gpio_pi4b_pigpio_plugin PUBLIC
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 target_link_libraries(
   rr_gpio_pi4b_pigpio_plugin PUBLIC
+  pigpio::pigpio
   ${ros-kilted-rr-common-base_TARGETS}
   ${ros-kilted-rr-interfaces_TARGETS}
   ${ros-kilted-rr-motor-controller_TARGETS}
