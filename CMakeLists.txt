@@ -1,3 +1,23 @@
+# Copyright (c) 2026 Ryder Robots
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
 cmake_minimum_required(VERSION 3.20)
 project(rr_gpio_pi4b_pigpio_plugin)
 
@@ -8,9 +28,14 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
-find_package(ros-kilted-rr-common-base REQUIRED)
-find_package(ros-kilted-rr-interfaces REQUIRED)
-find_package(ros-kilted-rr-motor-controller REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(rr_common_base REQUIRED)
+find_package(rr_interfaces REQUIRED)
+find_package(rr_motor_controller REQUIRED)
 find_package(pigpio REQUIRED)
 
 add_library(rr_gpio_pi4b_pigpio_plugin src/rr_gpio_pi4b_pigpio_plugin.cpp)
@@ -22,9 +47,9 @@ target_include_directories(rr_gpio_pi4b_pigpio_plugin PUBLIC
 target_link_libraries(
   rr_gpio_pi4b_pigpio_plugin PUBLIC
   pigpio::pigpio
-  ${ros-kilted-rr-common-base_TARGETS}
-  ${ros-kilted-rr-interfaces_TARGETS}
-  ${ros-kilted-rr-motor-controller_TARGETS}
+  ${rr_common_base_TARGETS}
+  ${rr_interfaces_TARGETS}
+  ${rr_motor_controller_TARGETS}
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,

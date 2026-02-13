@@ -1,0 +1,5 @@
+<library path="rr_gpio_pi4b_pigpio_plugin">
+  <class type="rr_gpio_pi4b_pigpio_plugin::RrGpioPi4BPigpioPlugin" base_class_type="rrobots::interfaces::RRGPIOInterface">
+    <description>Pi4B interface for GPIO.</description>
+  </class>
+</library>

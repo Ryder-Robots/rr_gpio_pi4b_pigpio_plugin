@@ -9,14 +9,9 @@
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
 
-  <depend>rclcpp</depend>
-  <depend>rclcpp_lifecycle</depend>
   <depend>rr_common_base</depend>
   <depend>rr_interfaces</depend>
   <depend>rr_motor_controller</depend>
-  <depend>rclcpp_components</depend>
-  <depend>rclcpp_action</depend>
-  <depend>pluginlib</depend>
   <depend>rrpigpio</depend>
 
   <test_depend>ament_lint_auto</test_depend>
