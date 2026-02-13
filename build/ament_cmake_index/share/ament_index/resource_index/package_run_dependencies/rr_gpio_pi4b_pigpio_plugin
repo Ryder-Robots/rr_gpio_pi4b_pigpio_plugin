@@ -1,1 +1,1 @@
-rr_common_base;rr_interfaces;rr_motor_controller;rrpigpio;ament_lint_auto;ament_lint_common
+rclcpp;rclcpp_lifecycle;rr_common_base;rr_interfaces;rr_motor_controller;rclcpp_components;rclcpp_action;pluginlib;rrpigpio;ament_lint_auto;ament_lint_common
