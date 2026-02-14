@@ -66,11 +66,11 @@ public:
 
   int terminate() override;
 
-  int set_pin_mode(int pin, int mode) override;
+  int set_pin_mode(unsigned pin, int mode) override;
 
-  int set_pull_up_down(int pin, int pud) override;
+  int set_pull_up_down(unsigned pin, unsigned pud) override;
 
-  int set_isr_func_ex(int pin, int edge, gpio_isr_func_ex_t func, void* userdata) override;
+  int set_isr_func_ex(unsigned gpio, unsigned edge, int timeout, gpio_isr_func_ex_t func, void* userdata) override;
 
   int clear_isr_func(unsigned gpio) override;
 
