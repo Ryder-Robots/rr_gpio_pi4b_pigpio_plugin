@@ -83,5 +83,8 @@ public:
   int gpio_hardware_get_pwm(unsigned pin) override;
 
   std::list<unsigned> get_pwm_pins() const override;
+
+  private:
+  std::map<std::string, ValueType> hw_rpt = {};
 };
 }  // namespace rr_gpio_pi4b_pigpio_plugin
