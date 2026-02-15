@@ -1,4 +1,0 @@
-source;share/rr_gpio_pi4b_pigpio_plugin/local_setup.bash
-source;share/rr_gpio_pi4b_pigpio_plugin/local_setup.dsv
-source;share/rr_gpio_pi4b_pigpio_plugin/local_setup.sh
-source;share/rr_gpio_pi4b_pigpio_plugin/local_setup.zsh
