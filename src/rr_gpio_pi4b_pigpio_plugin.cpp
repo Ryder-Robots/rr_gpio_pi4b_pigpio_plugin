@@ -40,6 +40,7 @@ CallbackReturn RrGpioPi4BPigpioPlugin::configure(const rclcpp_lifecycle::State& 
     return CallbackReturn::FAILURE;
   }
 
+  RCLCPP_INFO(rclcpp::get_logger("GPIO_PI4"), "configuring GPIO");
   unsigned model = (rev >> 4) & 0xFF;
   std::ostringstream oss;
   oss << "0x" << std::hex << rev << std::dec;
@@ -113,7 +114,7 @@ int RrGpioPi4BPigpioPlugin::set_pin_mode(unsigned pin, int mode)
 {
   if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
   {
-    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "set_pin_mode - interface is not activated");
     return -1;
   }
   return gpioSetMode(pin, mode);
@@ -123,7 +124,7 @@ int RrGpioPi4BPigpioPlugin::set_pull_up_down(unsigned pin, unsigned pud)
 {
   if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
   {
-    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "set_pull_up_down - interface is not activated");
     return -1;
   }
   return gpioSetPullUpDown(pin, pud);
@@ -134,7 +135,7 @@ int RrGpioPi4BPigpioPlugin::set_isr_func_ex(unsigned gpio, unsigned edge, int ti
 {
   if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
   {
-    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "set_isr_func_ex - interface is not activated");
     return -1;
   }
   int rv = -1;
@@ -155,7 +156,7 @@ int RrGpioPi4BPigpioPlugin::digital_write(unsigned gpio, unsigned level)
 {
   if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
   {
-    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "digital_write - interface is not activated");
     return -1;
   }
   return gpioWrite(gpio, level);
@@ -165,7 +166,7 @@ int RrGpioPi4BPigpioPlugin::digital_read(unsigned gpio)
 {
   if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
   {
-    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "digital_read - interface is not activated");
     return -1;
   }
   return gpioRead(gpio);
@@ -176,7 +177,7 @@ int RrGpioPi4BPigpioPlugin::gpio_hardware_pwm(unsigned pin, unsigned pwm_freq, u
 {
   if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
   {
-    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "gpio_hardware_pwm - interface is not activated");
     return -1;
   }
   return gpioHardwarePWM(pin, pwm_freq, pwm_duty_cycle);
@@ -189,7 +190,7 @@ int RrGpioPi4BPigpioPlugin::gpio_hardware_get_pwm(unsigned pin)
 {
   if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
   {
-    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "gpio_hardware_get_pwm - interface is not activated");
     return -1;
   }
   return gpioGetPWMdutycycle(pin);
@@ -200,7 +201,7 @@ std::list<unsigned> RrGpioPi4BPigpioPlugin::get_pwm_pins() const
   std::list<unsigned> pwm_pins = {};
   if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
   {
-    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "get_pwm_pins - interface is not activated");
     return pwm_pins;
   }
 
@@ -230,7 +231,7 @@ uint32_t RrGpioPi4BPigpioPlugin::tick()
 {
   if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
   {
-    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "tick - interface is not activated");
     return 0;
   }
   return gpioTick();
