@@ -31,19 +31,21 @@ CallbackReturn RrGpioPi4BPigpioPlugin::configure(const rclcpp_lifecycle::State& 
                                                  rclcpp_lifecycle::LifecycleNode::SharedPtr node)
 {
   (void)state;
+  (void)node;
 
   unsigned rev = gpioHardwareRevision();
   if (rev == 0)
   {
-    RCLCPP_ERROR(node->get_logger(), "pigpio has an unknown revision");
+    RCLCPP_ERROR(rclcpp::get_logger("GPIO_PI4"), "pigpio has an unknown revision!!!");
     return CallbackReturn::FAILURE;
   }
 
   unsigned model = (rev >> 4) & 0xFF;
   std::ostringstream oss;
   oss << "0x" << std::hex << rev << std::dec;
-  hw_rpt["HARDWARE_REVISION"] = oss.str();
-  hw_rpt["MODEL_NUMBER"] = static_cast<int>(model);
+  hw_rpt_["HARDWARE_REVISION"] = oss.str();
+  hw_rpt_["RAW_HW_REVISION"] = static_cast<int>(rev);
+  hw_rpt_["MODEL_NUMBER"] = static_cast<int>(model);
 
   return CallbackReturn::SUCCESS;
 }
@@ -52,16 +54,14 @@ CallbackReturn RrGpioPi4BPigpioPlugin::configure(const rclcpp_lifecycle::State& 
 CallbackReturn RrGpioPi4BPigpioPlugin::on_activate(const rclcpp_lifecycle::State& state)
 {
   (void)state;
-
-  // TODO: For safety all pins should be pulled low, this will ensure that they
-  // are not left floating.
   int pigpio_ver = 0;
   if ((pigpio_ver = gpioInitialise()) == PI_INIT_FAILED)
   {
+    RCLCPP_ERROR(rclcpp::get_logger("GPIO_PI4"), "monitor initilization failed!!!");
     return CallbackReturn::FAILURE;
   }
 
-  hw_rpt["PIGPIO_VERSION"] = pigpio_ver;
+  hw_rpt_["PIGPIO_VERSION"] = pigpio_ver;
 
   return CallbackReturn::SUCCESS;
 }
@@ -74,48 +74,167 @@ CallbackReturn RrGpioPi4BPigpioPlugin::on_deactivate(const rclcpp_lifecycle::Sta
   gpioTerminate();
 
   // remove version, this will mean this will stop interactions with backend library.
-  hw_rpt.erase("PIGPIO_VERSION");
+  hw_rpt_.erase("PIGPIO_VERSION");
   return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn RrGpioPi4BPigpioPlugin::on_cleanup(const rclcpp_lifecycle::State& state)
 {
   (void)state;
-  hw_rpt.clear();
+  hw_rpt_.clear();
   return CallbackReturn::SUCCESS;
 }
 
 std::map<std::string, ValueType> RrGpioPi4BPigpioPlugin::hardware_report() const
 {
-  if (hw_rpt.size() == 0)
+  if (hw_rpt_.size() == 0)
   {
-    // TODO: WARN THAT CLASS WAS NOT CONFIGURED
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface does not appear to be configured");
   }
-  return hw_rpt;
+  return hw_rpt_;
 }
 
 // TODO: Depreciate
 int RrGpioPi4BPigpioPlugin::initialise()
 {
   // spit out that activate should be used instead of initialise.
-  return 0;
+  return gpioInitialise();
 }
 
 // TODO: Deprecate
 int RrGpioPi4BPigpioPlugin::terminate()
 {
   // spit out that deactivate should be used instead of terminate.
+  gpioTerminate();
   return 0;
 }
 
 int RrGpioPi4BPigpioPlugin::set_pin_mode(unsigned pin, int mode)
 {
-    if (hw_rpt.find("PIGPIO_VERSION") == hw_rpt.end())
-    {
-        // TODO spit out that configure and activate must be ran before using this method.
-        return -1;
-    }
-    return gpioSetMode(pin, mode);
+  if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
+  {
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    return -1;
+  }
+  return gpioSetMode(pin, mode);
+}
+
+int RrGpioPi4BPigpioPlugin::set_pull_up_down(unsigned pin, unsigned pud)
+{
+  if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
+  {
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    return -1;
+  }
+  return gpioSetPullUpDown(pin, pud);
+}
+
+int RrGpioPi4BPigpioPlugin::set_isr_func_ex(unsigned gpio, unsigned edge, int timeout, gpio_isr_func_ex_t func,
+                                            void* userdata)
+{
+  if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
+  {
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    return -1;
+  }
+  int rv = -1;
+  if ((rv = gpioSetISRFuncEx(gpio, edge, timeout, func, userdata)) >= 0)
+  {
+    gpio_cb_[gpio] = func;
+  }
+  return rv;
+}
+
+int RrGpioPi4BPigpioPlugin::clear_isr_func(unsigned gpio)
+{
+  gpio_cb_[gpio] = nullptr;
+  return 0;
+}
+
+int RrGpioPi4BPigpioPlugin::digital_write(unsigned gpio, unsigned level)
+{
+  if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
+  {
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    return -1;
+  }
+  return gpioWrite(gpio, level);
+}
+
+int RrGpioPi4BPigpioPlugin::digital_read(unsigned gpio)
+{
+  if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
+  {
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    return -1;
+  }
+  return gpioRead(gpio);
+}
+
+// TODO this needs to be renamed to analog_write() in order to match common names.
+int RrGpioPi4BPigpioPlugin::gpio_hardware_pwm(unsigned pin, unsigned pwm_freq, unsigned pwm_duty_cycle)
+{
+  if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
+  {
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    return -1;
+  }
+  return gpioHardwarePWM(pin, pwm_freq, pwm_duty_cycle);
+}
+
+// TODO this needs to have its name changed to analog_read() to match common reference in next version.
+// Note this only returns what the interface has written to the pin, not what is externally recieved.
+// Perhaps more work needs to be done here, to include a callback.
+int RrGpioPi4BPigpioPlugin::gpio_hardware_get_pwm(unsigned pin)
+{
+  if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
+  {
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    return -1;
+  }
+  return gpioGetPWMdutycycle(pin);
+}
+
+std::list<unsigned> RrGpioPi4BPigpioPlugin::get_pwm_pins() const
+{
+  std::list<unsigned> pwm_pins = {};
+  if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
+  {
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    return pwm_pins;
+  }
+
+  auto it = hw_rpt_.find("RAW_HW_REVISION");
+  if (it == hw_rpt_.end())
+  {
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "hardware revision not available");
+    return pwm_pins;
+  }
+
+  unsigned rev = static_cast<unsigned>(std::get<int>(hw_rpt_.at("RAW_HW_REVISION")));
+  // BCM2835 (and BCM2711 on Pi 4)
+  if ((rev & 0x800000) || (rev > 0 && rev < 0x0016))
+  {
+    // New-style revision code
+    pwm_pins = { 12, 13, 18, 19 };
+  }
+  else
+  {
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "unknown board");
+  }
+
+  return pwm_pins;
+}
+
+uint32_t RrGpioPi4BPigpioPlugin::tick()
+{
+  if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
+  {
+    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "interface is not activated");
+    return 0;
+  }
+  return gpioTick();
 }
 
 }  // namespace rr_gpio_pi4b_pigpio_plugin
+PLUGINLIB_EXPORT_CLASS(rr_gpio_pi4b_pigpio_plugin::RrGpioPi4BPigpioPlugin, rrobots::interfaces::RRGPIOInterface)

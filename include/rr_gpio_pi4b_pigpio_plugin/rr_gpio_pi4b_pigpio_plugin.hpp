@@ -30,9 +30,12 @@
 
 #pragma once
 
+#include <list>
 #include <map>
 #include <string>
+#include <variant>
 #include <pigpio.h>
+#include <pluginlib/class_list_macros.hpp>
 #include "rr_common_base/rr_gpio_plugin_iface.hpp"
 #include "rr_gpio_pi4b_pigpio_plugin/visibility_control.h"
 #include "rclcpp/rclcpp.hpp"
@@ -82,9 +85,14 @@ public:
 
   int gpio_hardware_get_pwm(unsigned pin) override;
 
+  uint32_t tick() override;
+
+  //TODO: this should be change to std::vector more efficient for fixed set of pins
+  // however public interface would need to be done before this can be achieved.
   std::list<unsigned> get_pwm_pins() const override;
 
   private:
-  std::map<std::string, ValueType> hw_rpt = {};
+  std::map<std::string, ValueType> hw_rpt_ = {};
+  std::map<unsigned, gpio_isr_func_ex_t> gpio_cb_ =  {};
 };
 }  // namespace rr_gpio_pi4b_pigpio_plugin
