@@ -36,7 +36,7 @@ find_package(pluginlib REQUIRED)
 find_package(rr_common_base REQUIRED)
 find_package(rr_interfaces REQUIRED)
 find_package(rr_motor_controller REQUIRED)
-find_package(pigpio REQUIRED)
+find_package(rrpigpio REQUIRED)
 
 add_library(rr_gpio_pi4b_pigpio_plugin src/rr_gpio_pi4b_pigpio_plugin.cpp)
 add_library(rr_gpio_pi4b_pigpio_plugin::rr_gpio_pi4b_pigpio_plugin ALIAS rr_gpio_pi4b_pigpio_plugin)
@@ -45,11 +45,12 @@ target_include_directories(rr_gpio_pi4b_pigpio_plugin PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 target_link_libraries(
-  rr_gpio_pi4b_pigpio_plugin PUBLIC
-  pigpio::pigpio
-  ${rr_common_base_TARGETS}
-  ${rr_interfaces_TARGETS}
-  ${rr_motor_controller_TARGETS}
+  rr_gpio_pi4b_pigpio_plugin
+  PRIVATE ${rrpigpio_TARGETS}
+  PUBLIC
+    ${rr_common_base_TARGETS}
+    ${rr_interfaces_TARGETS}
+    ${rr_motor_controller_TARGETS}
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,

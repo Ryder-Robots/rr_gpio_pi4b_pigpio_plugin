@@ -143,6 +143,21 @@ int RrGpioPi4BPigpioPlugin::set_isr_func_ex(unsigned gpio, unsigned edge, int ti
   {
     gpio_cb_[gpio] = func;
   }
+  else
+  {
+    switch (rv)
+    {
+      case PI_BAD_GPIO:
+        RCLCPP_ERROR(rclcpp::get_logger("GPIO_PI4"), "set_isr_func_ex - PI_BAD_GPIO");
+        return rv;
+      case PI_BAD_EDGE:
+        RCLCPP_ERROR(rclcpp::get_logger("GPIO_PI4"), "set_isr_func_ex - PI_BAD_EDGE");
+        return rv;
+      case PI_BAD_ISR_INIT:
+        RCLCPP_ERROR(rclcpp::get_logger("GPIO_PI4"), "set_isr_func_ex - PI_BAD_ISR_INIT");
+        return rv;
+    }
+  }
   return rv;
 }
 
@@ -199,12 +214,6 @@ int RrGpioPi4BPigpioPlugin::gpio_hardware_get_pwm(unsigned pin)
 std::list<unsigned> RrGpioPi4BPigpioPlugin::get_pwm_pins() const
 {
   std::list<unsigned> pwm_pins = {};
-  if (hw_rpt_.find("PIGPIO_VERSION") == hw_rpt_.end())
-  {
-    RCLCPP_WARN(rclcpp::get_logger("GPIO_PI4"), "get_pwm_pins - interface is not activated");
-    return pwm_pins;
-  }
-
   auto it = hw_rpt_.find("RAW_HW_REVISION");
   if (it == hw_rpt_.end())
   {
